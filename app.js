@@ -26,12 +26,12 @@ mongoose.connect("mongodb://localhost:27017/session-manan",{
 app.use('/api',feedbackRoutes);
 
 
-//author
+//consume the api
 app.get('/',(req,res)=>{
-    return res.json({
-        author : "Sayantanu Dey",
-        description: "This endpoint is made for a tutorial session",
-    })
+    let apicallresponse = await fetch(`http://localhost:${port}/api/feedback`);
+    let feed = await apicallresponse.json();
+
+    
 })
 
 //app start
