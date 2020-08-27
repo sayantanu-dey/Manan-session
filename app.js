@@ -1,3 +1,5 @@
+const cheerio = require('cheerio');
+const fs = require("fs")
 const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
@@ -7,6 +9,8 @@ const cors = require("cors");
 const feedbackRoutes = require('./feedbackroute');
 
 //middlewares
+const {getAllFeeds} = require("./feedbackcontroller");
+
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -26,12 +30,21 @@ mongoose.connect("mongodb://localhost:27017/session-manan",{
 app.use('/api',feedbackRoutes);
 
 
-//consume the api
-app.get('/',(req,res)=>{
-    let apicallresponse = await fetch(`http://localhost:${port}/api/feedback`);
-    let feed = await apicallresponse.json();
 
-    
+
+//consume the api
+app.get('/',getAllFeeds,(req,res)=>{
+    let feeds = req.feedbacks;
+    var html = fs.readFileSync(__dirname + '/index.html', 'utf8');
+    let toinjecthtml = "";
+    feeds.forEach((feed) => {
+        let litag = `<li><div><span>${feed.firstname}</span><br>${feed.createdAt}<br><br>${feed.feedback}</div></li>`
+        toinjecthtml += litag;
+    })
+    var $ = cheerio.load(html);
+    $('ul').append(toinjecthtml);
+    res.send($.html());
+
 })
 
 //app start
